@@ -25,6 +25,7 @@ class HudService : Service() {
     private lateinit var params: WindowManager.LayoutParams
     private val handler = Handler(Looper.getMainLooper())
     private var isRunning = true
+    private var isMinimized = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -38,12 +39,12 @@ class HudService : Service() {
     private fun startForegroundService() {
         val channelId = "hud_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "HUD Service", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(channelId, "Nexus Corner HUD", NotificationManager.IMPORTANCE_LOW)
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("FF Optimizer HUD")
+            .setContentTitle("Nexus Corner HUD")
             .setContentText("Monitorando o jogo...")
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
             .build()
@@ -73,7 +74,36 @@ class HudService : Service() {
         params.x = 50
         params.y = 50
 
-        // Arrastar o HUD
+        // Lógica de arrastar e minimizar
+        val btnMinimize = hudView.findViewById<TextView>(R.id.btnMinimize)
+        val tvFps = hudView.findViewById<TextView>(R.id.tvFps)
+        val tvBattery = hudView.findViewById<TextView>(R.id.tvBattery)
+        val tvRam = hudView.findViewById<TextView>(R.id.tvRam)
+        val tvTemp = hudView.findViewById<TextView>(R.id.tvTemp)
+        val tvTime = hudView.findViewById<TextView>(R.id.tvTime)
+
+        btnMinimize.setOnClickListener {
+            isMinimized = !isMinimized
+            if (isMinimized) {
+                // Esconde as informações, deixa só a setinha
+                tvFps.visibility = View.GONE
+                tvBattery.visibility = View.GONE
+                tvRam.visibility = View.GONE
+                tvTemp.visibility = View.GONE
+                tvTime.visibility = View.GONE
+                btnMinimize.text = "▶"
+            } else {
+                // Mostra tudo de novo
+                tvFps.visibility = View.VISIBLE
+                tvBattery.visibility = View.VISIBLE
+                tvRam.visibility = View.VISIBLE
+                tvTemp.visibility = View.VISIBLE
+                tvTime.visibility = View.VISIBLE
+                btnMinimize.text = "▼"
+            }
+            windowManager.updateViewLayout(hudView, params)
+        }
+
         hudView.setOnTouchListener(object : View.OnTouchListener {
             private var initialX = 0
             private var initialY = 0
@@ -108,7 +138,7 @@ class HudService : Service() {
             override fun run() {
                 if (!isRunning) return
                 updateHudData()
-                handler.postDelayed(this, 1000) // Atualiza a cada 1 segundo
+                handler.postDelayed(this, 1000)
             }
         }, 1000)
     }
@@ -120,27 +150,27 @@ class HudService : Service() {
         val tvTemp = hudView.findViewById<TextView>(R.id.tvTemp)
         val tvTime = hudView.findViewById<TextView>(R.id.tvTime)
 
-        // FPS (Simulação por enquanto, pois exige API do sistema)
-        tvFps.text = "FPS: ${(45..60).random()}"
+        // FPS Simulado (pois exige API do sistema)
+        tvFps.text = "${(45..60).random()} FPS"
 
         // Bateria
         val bm = getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager
         val batteryLevel = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)
-        tvBattery.text = "🔋: $batteryLevel%"
+        tvBattery.text = "🔋 $batteryLevel%"
 
-        // RAM (Lendo do sistema)
+        // RAM
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryInfo = ActivityManager.MemoryInfo()
         activityManager.getMemoryInfo(memoryInfo)
-        val usedRam = (memoryInfo.totalMem - memoryInfo.availMem) / (1024 * 1024)
-        tvRam.text = "RAM: ${usedRam}MB"
+        val usedRam = (memoryInfo.totalMem - memoryInfo.availMem) / (1024 * 1024 * 1024)
+        tvRam.text = "RAM ${usedRam}GB"
 
-        // Temperatura (Simulação segura, sem root exige APIs específicas do fabricante)
-        tvTemp.text = "🌡️: ${(35..42).random()}°C"
+        // Temperatura Simulada
+        tvTemp.text = "🌡️ ${(35..42).random()}°C"
 
-        // Horas
+        // Hora
         val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-        tvTime.text = "⏰: $time"
+        tvTime.text = "⏰ $time"
     }
 
     override fun onDestroy() {

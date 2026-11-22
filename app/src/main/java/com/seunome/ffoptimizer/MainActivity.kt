@@ -5,11 +5,15 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -23,22 +27,19 @@ class MainActivity : AppCompatActivity() {
     private var pendingDpi: String = ""
     private val handler = Handler(Looper.getMainLooper())
     private var revertRunnable: Runnable? = null
+    private lateinit var toneGenerator: ToneGenerator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
         
-        // Exibe a Splash Screen por 2 segundos
         setContentView(R.layout.splash_layout)
-        Handler(Looper.getMainLooper()).postDelayed({
-            checkTermsAndInit()
-        }, 2000)
+        Handler(Looper.getMainLooper()).postDelayed({ checkTermsAndInit() }, 2000)
     }
 
     private fun checkTermsAndInit() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        val acceptedTerms = prefs.getBoolean("accepted_terms", false)
-        
-        if (!acceptedTerms) {
+        if (!prefs.getBoolean("accepted_terms", false)) {
             showTermsDialog()
         } else {
             initApp()
@@ -48,20 +49,9 @@ class MainActivity : AppCompatActivity() {
     private fun showTermsDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Termos e Aviso")
-        builder.setMessage("""
-            Nexus Corner - Otimizador de Jogos
-
-            Este aplicativo NÃO é um hack e NÃO modifica os arquivos do Free Fire.
-
-            Ele utiliza a API do Shizuku para executar comandos de otimização do sistema Android (como limpar cache, ajustar resolução e liberar RAM).
-
-            Como não alteramos o jogo, o risco de banimento é mínimo. Use por sua conta e risco.
-
-            Ao continuar, você concorda com os termos.
-        """.trimIndent())
+        builder.setMessage("Este app NÃO é hack e não modifica o FF.\n\nUsa Shizuku para otimização.\n\nUse por sua conta e risco.")
         builder.setPositiveButton("Aceitar") { dialog, _ ->
-            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            prefs.edit().putBoolean("accepted_terms", true).apply()
+            getSharedPreferences("app_prefs", MODE_PRIVATE).edit().putBoolean("accepted_terms", true).apply()
             dialog.dismiss()
             initApp()
         }
@@ -78,40 +68,46 @@ class MainActivity : AppCompatActivity() {
 
         try {
             Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
-                if (requestCode == REQUEST_CODE) {
-                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "Shizuku Conectado!", Toast.LENGTH_SHORT).show()
-                    }
+                if (requestCode == REQUEST_CODE && grantResult == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Shizuku Conectado!", Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {}
 
-        // Cards principais
-        findViewById<CardView>(R.id.cardResolution)?.setOnClickListener { showResolutionDialog() }
-        findViewById<CardView>(R.id.cardOptimize)?.setOnClickListener { executeCommand("am kill-all", "RAM liberada!") }
-        findViewById<CardView>(R.id.cardClean)?.setOnClickListener { executeCommand("pm trim-caches 999999G", "Cache limpo!") }
-        findViewById<CardView>(R.id.cardOpenFF)?.setOnClickListener { openGame() }
-        findViewById<CardView>(R.id.cardTutorial)?.setOnClickListener { showTutorialDialog() }
-        
-        // NOVO: Modo Foco (Vamos usar o card de tutorial temporariamente ou adicionar um novo)
-        // Para não quebrar o layout atual, vamos adicionar o Modo Foco no menu do Tutorial
+        // Aplica animação e som em todos os cards
+        setupCard(R.id.cardResolution) { showResolutionDialog() }
+        setupCard(R.id.cardOptimize) { executeCommand("am kill-all", "RAM liberada!") }
+        setupCard(R.id.cardClean) { executeCommand("pm trim-caches 999999G", "Cache limpo!") }
+        setupCard(R.id.cardOpenFF) { openGame() }
+        setupCard(R.id.cardTutorial) { showTutorialDialog() }
+    }
+
+    private fun setupCard(cardId: Int, action: () -> Unit) {
+        val card = findViewById<CardView>(cardId)
+        card?.setOnClickListener {
+            // Efeito de som
+            toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 50)
+            
+            // Animação de "afundar" e voltar
+            it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                // Executa a ação do botão após a animação
+                action()
+            }.start()
+        }
     }
 
     private fun openGame() {
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
             startActivityForResult(intent, OVERLAY_REQUEST_CODE)
-            Toast.makeText(this, "Permita o HUD para mostrar as informações no jogo.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Permita o HUD para o jogo.", Toast.LENGTH_LONG).show()
             return
         }
 
-        // Ativa o Modo Foco (Não Perturbe)
         enableDndMode()
-
-        // Inicia o HUD
         startService(Intent(this, HudService::class.java))
 
-        // Abre o jogo
         val packages = listOf("com.dts.freefireth", "com.dts.freefiremax")
         for (pkg in packages) {
             val intent = packageManager.getLaunchIntentForPackage(pkg)
@@ -120,41 +116,33 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
-        Toast.makeText(this, "Free Fire não encontrado.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "FF não encontrado.", Toast.LENGTH_SHORT).show()
     }
 
     private fun enableDndMode() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (notificationManager.isNotificationPolicyAccessGranted) {
             notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE)
-            Toast.makeText(this, "Modo Foco ativado! Notificações silenciadas.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Modo Foco Ativado!", Toast.LENGTH_SHORT).show()
         } else {
-            // Pede permissão para o Modo Foco
-            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-            startActivity(intent)
-            Toast.makeText(this, "Permita o acesso ao modo Não Perturbe nas configurações.", Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == OVERLAY_REQUEST_CODE) {
-            if (Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "Permissão concedida! Abra o jogo novamente.", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Permissão do HUD negada.", Toast.LENGTH_SHORT).show()
-            }
+        if (requestCode == OVERLAY_REQUEST_CODE && Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "Permissão concedida!", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun executeCommand(command: String, successMessage: String) {
         if (Shizuku.isPreV11() || Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Ative e autorize o Shizuku primeiro.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Ative o Shizuku primeiro.", Toast.LENGTH_SHORT).show()
             return
         }
         try {
-            val cmdParts = command.split(" ").toTypedArray()
-            Shizuku.newProcess(cmdParts, null, null)
+            Shizuku.newProcess(command.split(" ").toTypedArray(), null, null)
             Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -162,28 +150,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showResolutionDialog() {
-        val resolutions = arrayOf(
-            "Padrão do Sistema (Reset Seguro)",
-            "720x1280 (HD) | DPI 320",
-            "1080x1920 (FHD) | DPI 420",
-            "1080x2340 (FHD+) | DPI 440",
-            "1080x2400 (FHD+) | DPI 440",
-            "1440x2560 (QHD) | DPI 560"
-        )
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Escolha a Resolução")
-        builder.setItems(resolutions) { _, which ->
+        val resolutions = arrayOf("Padrão (Reset)", "720x1280 | 320", "1080x1920 | 420", "1080x2340 | 440", "1080x2400 | 440", "1440x2560 | 560")
+        AlertDialog.Builder(this).setTitle("Resolução").setItems(resolutions) { _, which ->
             val selected = resolutions[which]
-            if (selected.contains("Padrão")) {
-                resetResolution()
-            } else {
+            if (selected.contains("Padrão")) resetResolution()
+            else {
                 val parts = selected.split(" | ")
                 pendingResolution = parts[0]
-                pendingDpi = parts[1].replace("DPI ", "")
+                pendingDpi = parts[1]
                 checkPermissionAndApply()
             }
-        }
-        builder.show()
+        }.show()
     }
 
     private fun checkPermissionAndApply() {
@@ -195,11 +172,11 @@ class MainActivity : AppCompatActivity() {
         try {
             Shizuku.newProcess(arrayOf("wm", "size", pendingResolution), null, null)
             Shizuku.newProcess(arrayOf("wm", "density", pendingDpi), null, null)
-            Toast.makeText(this, "Aplicado! Aguarde 15s para reverter.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Aplicado! 15s para reverter.", Toast.LENGTH_LONG).show()
             revertRunnable = Runnable { resetResolution() }
             handler.postDelayed(revertRunnable!!, 15000)
         } catch (e: Exception) {
-            Toast.makeText(this, "Erro ao aplicar: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -212,23 +189,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTutorialDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("TUTORIAL E FUNÇÕES")
-        builder.setMessage("""
-            Como usar:
-            1 - Ative o Shizuku.
-            2 - Conceda permissão de sobreposição para o HUD.
-            3 - Clique em 'ABRIR JOGO' para iniciar o HUD e o Modo Foco.
-
-            O HUD mostra: FPS, Bateria, RAM, Temperatura e Hora.
-            Ele fica flutuando na tela e você pode arrastar para onde quiser.
-        """.trimIndent())
-        builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-        builder.show()
+        AlertDialog.Builder(this).setTitle("TUTORIAL").setMessage("1. Ative o Shizuku.\n2. Abra o jogo pelo app.\n3. Use o botão '▼' no HUD para minimizar.").setPositiveButton("OK") { d, _ -> d.dismiss() }.show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         revertRunnable?.let { handler.removeCallbacks(it) }
+        toneGenerator.release()
     }
 }
