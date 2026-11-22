@@ -1,6 +1,8 @@
 package com.seunome.ffoptimizer
 
 import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -24,6 +26,54 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Exibe a Splash Screen por 2 segundos
+        setContentView(R.layout.splash_layout)
+        Handler(Looper.getMainLooper()).postDelayed({
+            checkTermsAndInit()
+        }, 2000)
+    }
+
+    private fun checkTermsAndInit() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val acceptedTerms = prefs.getBoolean("accepted_terms", false)
+        
+        if (!acceptedTerms) {
+            showTermsDialog()
+        } else {
+            initApp()
+        }
+    }
+
+    private fun showTermsDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Termos e Aviso")
+        builder.setMessage("""
+            Nexus Corner - Otimizador de Jogos
+
+            Este aplicativo NÃO é um hack e NÃO modifica os arquivos do Free Fire.
+
+            Ele utiliza a API do Shizuku para executar comandos de otimização do sistema Android (como limpar cache, ajustar resolução e liberar RAM).
+
+            Como não alteramos o jogo, o risco de banimento é mínimo. Use por sua conta e risco.
+
+            Ao continuar, você concorda com os termos.
+        """.trimIndent())
+        builder.setPositiveButton("Aceitar") { dialog, _ ->
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            prefs.edit().putBoolean("accepted_terms", true).apply()
+            dialog.dismiss()
+            initApp()
+        }
+        builder.setNegativeButton("Recusar") { dialog, _ ->
+            dialog.dismiss()
+            finish()
+        }
+        builder.setCancelable(false)
+        builder.show()
+    }
+
+    private fun initApp() {
         setContentView(R.layout.activity_main)
 
         try {
@@ -36,14 +86,15 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {}
 
+        // Cards principais
         findViewById<CardView>(R.id.cardResolution)?.setOnClickListener { showResolutionDialog() }
         findViewById<CardView>(R.id.cardOptimize)?.setOnClickListener { executeCommand("am kill-all", "RAM liberada!") }
         findViewById<CardView>(R.id.cardClean)?.setOnClickListener { executeCommand("pm trim-caches 999999G", "Cache limpo!") }
         findViewById<CardView>(R.id.cardOpenFF)?.setOnClickListener { openGame() }
         findViewById<CardView>(R.id.cardTutorial)?.setOnClickListener { showTutorialDialog() }
         
-        // NOVO BOTÃO DO HUD: Vamos usar o Card de Tutorial segurando, ou adicionar depois. 
-        // Por enquanto, vamos iniciar o HUD ao abrir o jogo.
+        // NOVO: Modo Foco (Vamos usar o card de tutorial temporariamente ou adicionar um novo)
+        // Para não quebrar o layout atual, vamos adicionar o Modo Foco no menu do Tutorial
     }
 
     private fun openGame() {
@@ -54,7 +105,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Liga o HUD
+        // Ativa o Modo Foco (Não Perturbe)
+        enableDndMode()
+
+        // Inicia o HUD
         startService(Intent(this, HudService::class.java))
 
         // Abre o jogo
@@ -65,6 +119,20 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
                 return
             }
+        }
+        Toast.makeText(this, "Free Fire não encontrado.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun enableDndMode() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (notificationManager.isNotificationPolicyAccessGranted) {
+            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE)
+            Toast.makeText(this, "Modo Foco ativado! Notificações silenciadas.", Toast.LENGTH_SHORT).show()
+        } else {
+            // Pede permissão para o Modo Foco
+            val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            startActivity(intent)
+            Toast.makeText(this, "Permita o acesso ao modo Não Perturbe nas configurações.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -145,8 +213,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun showTutorialDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("TUTORIAL")
-        builder.setMessage("1 - Ative o Shizuku.\n2 - Abra o jogo pelo app.\n3 - O HUD aparecerá na tela.\n4 - Arraste o HUD para onde quiser.")
+        builder.setTitle("TUTORIAL E FUNÇÕES")
+        builder.setMessage("""
+            Como usar:
+            1 - Ative o Shizuku.
+            2 - Conceda permissão de sobreposição para o HUD.
+            3 - Clique em 'ABRIR JOGO' para iniciar o HUD e o Modo Foco.
+
+            O HUD mostra: FPS, Bateria, RAM, Temperatura e Hora.
+            Ele fica flutuando na tela e você pode arrastar para onde quiser.
+        """.trimIndent())
         builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
