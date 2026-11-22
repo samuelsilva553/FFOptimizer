@@ -20,13 +20,13 @@ class LobbyActivity : Activity() {
         super.onCreate(s)
         setContentView(R.layout.activity_lobby)
         prefs = getSharedPreferences("nc", MODE_PRIVATE)
-        v<TextView>(R.id.tvVer).text = "V" + packageManager.getPackageInfo(packageName, 0).versionName
+        val legal = { _: View -> startActivity(Intent(this, LegalActivity::class.java)) }
+        v<TextView>(R.id.tvFooter).text = "Nexus Corner v" + packageManager.getPackageInfo(packageName, 0).versionName + "  ·  Termos e direitos autorais"
+        v<View>(R.id.tvFooter).setOnClickListener(legal)
+        v<View>(R.id.btnInfo).setOnClickListener(legal)
         v<View>(R.id.btnSpace).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        v<View>(R.id.btnTools).setOnClickListener { startActivity(Intent(this, MainActivity::class.java).putExtra("tab", "tools")) }
         v<View>(R.id.btnAdd).setOnClickListener { Lib.addDialog(this, prefs) { build() } }
-        v<View>(R.id.btnNavInfo).setOnClickListener { startActivity(Intent(this, LegalActivity::class.java)) }
-        v<View>(R.id.btnNavTools).setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java).putExtra("tab", "tools"))
-        }
     }
 
     override fun onResume() {
@@ -37,6 +37,7 @@ class LobbyActivity : Activity() {
         val b = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val sc = b?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
         v<TextView>(R.id.tvBat).text = "${(b?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0) ?: 0) * 100 / sc}%"
+        v<TextView>(R.id.tvTemp).text = "%.0f°C".format((b?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0) / 10.0)
         build()
     }
 
@@ -49,7 +50,9 @@ class LobbyActivity : Activity() {
         v<View>(R.id.tvEmpty).visibility = if (pkgs.isEmpty()) View.VISIBLE else View.GONE
         for (p in pkgs) {
             val c = layoutInflater.inflate(R.layout.item_lobby, list, false)
-            c.findViewById<ImageView>(R.id.lIcon).setImageDrawable(pm.getApplicationIcon(p))
+            val ic = pm.getApplicationIcon(p)
+            c.findViewById<ImageView>(R.id.lBg).setImageDrawable(ic)
+            c.findViewById<ImageView>(R.id.lIcon).setImageDrawable(ic)
             c.findViewById<TextView>(R.id.lName).text = Lib.label(pm, p)
             c.findViewById<TextView>(R.id.lVer).text = "v" + (pm.getPackageInfo(p, 0).versionName ?: "")
             c.setOnClickListener { startActivity(Intent(this, MainActivity::class.java).putExtra("select", p)) }

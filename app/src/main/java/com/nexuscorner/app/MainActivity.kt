@@ -193,6 +193,7 @@ class MainActivity : Activity() {
         for (i in 0 until row.childCount) {
             val c = row.getChildAt(i)
             val on = p != null && c.tag == p
+            c.setBackgroundResource(if (on) R.drawable.card_game_sel else R.drawable.card_game)
             c.animate().alpha(if (on) 1f else 0.5f).scaleX(if (on) 1f else 0.94f).scaleY(if (on) 1f else 0.94f).setDuration(160).start()
         }
         v<TextView>(R.id.tvGame).text = p?.let { label(it) } ?: "Nenhum jogo"
