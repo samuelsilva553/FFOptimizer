@@ -14,28 +14,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // 1. Card Resolução
-        findViewById<CardView>(R.id.cardResolution).setOnClickListener {
+        findViewById<CardView>(R.id.cardResolution)?.setOnClickListener {
             showResolutionDialog()
         }
 
-        // 2. Card Otimizar RAM (Simulação por enquanto)
-        findViewById<CardView>(R.id.cardResolution).setOnClickListener {
-            Toast.makeText(this, "Otimizando RAM... (Em breve)", Toast.LENGTH_SHORT).show()
-        }
-
-        // 3. Card Abrir FF
-        findViewById<CardView>(R.id.cardOpenFF).setOnClickListener {
+        // 2. Card Abrir FF
+        findViewById<CardView>(R.id.cardOpenFF)?.setOnClickListener {
             try {
                 val intent = packageManager.getLaunchIntentForPackage("com.dts.freefireth")
-                if (intent != null) startActivity(intent) 
-                else Toast.makeText(this, "Free Fire não instalado.", Toast.LENGTH_SHORT).show()
+                if (intent != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, "Free Fire não instalado.", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
                 Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // 4. Card Tutorial
-        findViewById<CardView>(R.id.cardTutorial).setOnClickListener {
+        // 3. Card Tutorial
+        findViewById<CardView>(R.id.cardTutorial)?.setOnClickListener {
             showTutorialDialog()
         }
     }
@@ -58,7 +56,6 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle("Escolha a Resolução")
         builder.setItems(resolutions) { dialog, which ->
             val selected = resolutions[which]
-            // AQUI ENTRARÁ A LÓGICA DO SHIZUKU DEPOIS
             Toast.makeText(this, "Selecionado: $selected\n(Integração Shizuku em breve)", Toast.LENGTH_LONG).show()
         }
         builder.show()
