@@ -28,6 +28,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-}
+    
+    // Bibliotecas do Shizuku na posição correta:
     implementation "dev.rikka.shizuku:api:12.2.0"
     implementation "dev.rikka.shizuku:provider:12.2.0"
+}
