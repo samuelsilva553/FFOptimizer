@@ -27,6 +27,7 @@ import android.widget.EditText
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
@@ -45,6 +46,7 @@ class MainActivity : Activity() {
     private var resApplied = false
     private var dndApplied = false
     private var timer: CountDownTimer? = null
+    private var cur: String? = null
 
     private val onBinder = Shizuku.OnBinderReceivedListener { refreshShizuku() }
     private val onDead = Shizuku.OnBinderDeadListener { refreshShizuku() }
@@ -64,7 +66,19 @@ class MainActivity : Activity() {
         prefs = getSharedPreferences("nc", MODE_PRIVATE)
         val dm = resources.displayMetrics
         pw = minOf(dm.widthPixels, dm.heightPixels); ph = maxOf(dm.widthPixels, dm.heightPixels); pd = dm.densityDpi
+        val tabs = mapOf(R.id.tabGames to R.id.panelGames, R.id.tabTools to R.id.panelTools, R.id.tabInfo to R.id.panelInfo)
+        fun show(t: Int) = tabs.forEach { (tab, panel) ->
+            v<View>(tab).isSelected = tab == t
+            v<TextView>(tab).setTextColor(getColor(if (tab == t) R.color.bg else R.color.text))
+            v<View>(panel).visibility = if (tab == t) View.VISIBLE else View.GONE
+        }
+        tabs.keys.forEach { t -> v<View>(t).setOnClickListener { show(t) } }
+        show(R.id.tabGames)
         buildLibrary()
+        v<View>(R.id.btnStart).setOnClickListener { cur?.let { play(it) } }
+        v<View>(R.id.btnGrid).setOnClickListener { cur?.let { sheet(it) } }
+        v<View>(R.id.btnPower).setOnClickListener { finishAffinity() }
+        v<View>(R.id.btnTerms).setOnClickListener { startActivity(Intent(this, LegalActivity::class.java)) }
         v<View>(R.id.btnShizuku).setOnClickListener {
             when (state()) {
                 0 -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://shizuku.rikka.app/download/")))
@@ -78,17 +92,9 @@ class MainActivity : Activity() {
             bg({ sh("am kill-all") }) { toast("Processos em segundo plano encerrados") }
         }
         v<View>(R.id.btnRestore).setOnClickListener { revert() }
-        val legal = { _: View -> startActivity(Intent(this, LegalActivity::class.java)) }
-        v<View>(R.id.tvLegal).setOnClickListener(legal)
-        v<View>(R.id.btnInfo).setOnClickListener(legal)
         Shizuku.addBinderReceivedListenerSticky(onBinder)
         Shizuku.addBinderDeadListener(onDead)
         Shizuku.addRequestPermissionResultListener(onPerm)
-        val box = v<ViewGroup>(R.id.content)
-        for (i in 0 until box.childCount) box.getChildAt(i).apply {
-            alpha = 0f; translationY = 48f
-            animate().alpha(1f).translationY(0f).setStartDelay(i * 70L).setDuration(380).start()
-        }
     }
 
     override fun onResume() {
@@ -111,13 +117,19 @@ class MainActivity : Activity() {
     private fun stats() {
         val mi = ActivityManager.MemoryInfo()
         (getSystemService(ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(mi)
-        v<TextView>(R.id.tvRamV).text = "${100 - mi.availMem * 100 / mi.totalMem}%"
+        val used = (100 - mi.availMem * 100 / mi.totalMem).toInt()
+        v<TextView>(R.id.tvRam).text = "$used%"; v<ProgressBar>(R.id.pbRam).progress = used
         val b = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val lvl = b?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0) ?: 0
         val sc = b?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
         v<TextView>(R.id.tvBatV).text = "${lvl * 100 / sc}%"
-        v<TextView>(R.id.tvTempV).text = "%.1f°".format((b?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0) / 10.0)
-        v<TextView>(R.id.tvStoV).text = "%.0f GB".format(StatFs(Environment.getDataDirectory().path).availableBytes / 1e9)
+        val t = (b?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0) / 10.0
+        v<TextView>(R.id.tvTemp).text = "%.1f°C".format(t); v<ProgressBar>(R.id.pbTemp).progress = t.toInt()
+        if (state() == 3) bg({ sh("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq") }) { o ->
+            val m = o.lines().mapNotNull { it.trim().toLongOrNull() }.maxOrNull()
+            v<TextView>(R.id.tvCpu).text = if (m != null) "%.2f GHz".format(m / 1e6) else "—"
+            v<ProgressBar>(R.id.pbCpu).progress = ((m ?: 0L) / 1000).toInt()
+        } else v<TextView>(R.id.tvCpu).text = "—"
     }
 
     // ---------- Biblioteca ----------
@@ -135,21 +147,43 @@ class MainActivity : Activity() {
     }
 
     private fun buildLibrary() {
-        val g = v<GridLayout>(R.id.grid)
-        g.removeAllViews()
-        fun cell(icon: android.graphics.drawable.Drawable?, name: String, res: Int, click: () -> Unit) {
-            val c = layoutInflater.inflate(R.layout.item_game, g, false)
-            val iv = c.findViewById<ImageView>(R.id.gIcon)
-            if (icon != null) iv.setImageDrawable(icon) else iv.setImageResource(res)
-            c.findViewById<TextView>(R.id.gName).text = name
-            c.setOnClickListener { click() }
-            c.layoutParams = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED), GridLayout.spec(GridLayout.UNDEFINED, 1f)).apply { width = 0 }
-            g.addView(c)
+        val row = v<LinearLayout>(R.id.carousel)
+        row.removeAllViews()
+        val pkgs = lib().filter { try { packageManager.getApplicationInfo(it, 0); true } catch (e: Exception) { false } }
+        fun card(p: String?): View {
+            val c = layoutInflater.inflate(R.layout.item_game, row, false)
+            if (p != null) {
+                val ic = packageManager.getApplicationIcon(p)
+                c.findViewById<ImageView>(R.id.gBg).setImageDrawable(ic)
+                c.findViewById<ImageView>(R.id.gIcon).setImageDrawable(ic)
+                c.findViewById<TextView>(R.id.gName).text = label(p)
+                c.findViewById<TextView>(R.id.gVer).text = "v" + (packageManager.getPackageInfo(p, 0).versionName ?: "")
+                c.setOnClickListener { select(p) }
+            } else {
+                c.findViewById<ImageView>(R.id.gIcon).setImageResource(R.drawable.ic_plus)
+                c.findViewById<TextView>(R.id.gName).text = "Adicionar"
+                c.findViewById<TextView>(R.id.gVer).text = "Novo jogo"
+                c.setOnClickListener { addDialog() }
+            }
+            c.tag = p
+            return c
         }
-        for (p in lib()) try {
-            cell(packageManager.getApplicationIcon(p), label(p), 0) { sheet(p) }
-        } catch (e: PackageManager.NameNotFoundException) { }
-        cell(null, "Adicionar", R.drawable.ic_plus) { addDialog() }
+        pkgs.forEach { row.addView(card(it)) }
+        row.addView(card(null))
+        select(cur?.takeIf { it in pkgs } ?: pkgs.firstOrNull())
+    }
+
+    private fun select(p: String?) {
+        cur = p
+        val row = v<LinearLayout>(R.id.carousel)
+        for (i in 0 until row.childCount) {
+            val c = row.getChildAt(i)
+            val on = p != null && c.tag == p
+            c.animate().alpha(if (on) 1f else 0.5f).scaleX(if (on) 1f else 0.94f).scaleY(if (on) 1f else 0.94f).setDuration(160).start()
+        }
+        v<TextView>(R.id.tvGame).text = p?.let { label(it) } ?: "Nenhum jogo"
+        v<TextView>(R.id.tvPkg).text = p ?: "Toque em Adicionar"
+        v<View>(R.id.btnStart).alpha = if (p == null) 0.4f else 1f
     }
 
     private fun addDialog() {
@@ -176,7 +210,7 @@ class MainActivity : Activity() {
         d.setContentView(R.layout.sheet_game)
         d.window?.apply {
             setBackgroundDrawableResource(R.drawable.sheet_bg); setGravity(Gravity.BOTTOM)
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            setLayout(minOf(resources.displayMetrics.widthPixels, dp(640)), ViewGroup.LayoutParams.WRAP_CONTENT)
         }
         fun <T : View> s(id: Int): T = d.findViewById(id)
         fun num(id: Int) = s<EditText>(id).text.toString().toIntOrNull()
@@ -288,7 +322,7 @@ class MainActivity : Activity() {
         dlg.setContentView(ScrollView(this).apply { addView(col) })
         dlg.window?.apply {
             setBackgroundDrawableResource(R.drawable.sheet_bg); setGravity(Gravity.BOTTOM)
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.8).toInt())
+            setLayout(minOf(resources.displayMetrics.widthPixels, dp(640)), (resources.displayMetrics.heightPixels * 0.85).toInt())
         }
         dlg.show()
     }

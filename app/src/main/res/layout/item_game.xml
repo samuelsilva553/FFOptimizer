@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="6dp">
-    <ImageView android:id="@+id/gIcon" android:layout_width="60dp" android:layout_height="60dp" android:padding="8dp" android:background="@drawable/tile"/>
-    <TextView android:id="@+id/gName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:gravity="center" android:maxLines="1" android:ellipsize="end" android:textColor="@color/muted" android:textSize="11sp"/>
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="210dp" android:layout_height="124dp" android:layout_marginEnd="12dp" android:background="@drawable/card_game" android:clipToOutline="true">
+    <ImageView android:id="@+id/gBg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:scaleX="2.4" android:scaleY="2.4" android:alpha="0.22"/>
+    <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/fade_bottom"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="bottom|start" android:padding="14dp">
+        <ImageView android:id="@+id/gIcon" android:layout_width="46dp" android:layout_height="46dp" android:padding="5dp" android:background="@drawable/tile"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
+            <TextView android:id="@+id/gName" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end" android:textColor="@color/text" android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+            <TextView android:id="@+id/gVer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/muted" android:textSize="11sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
