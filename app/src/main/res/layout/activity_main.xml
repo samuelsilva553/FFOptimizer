@@ -3,53 +3,25 @@
 <LinearLayout android:id="@+id/content" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:gravity="center_vertical">
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <TextView style="@style/Label" android:text="NEXUS CORNER" android:textColor="@color/a2"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/headline" android:textColor="@color/text" android:textSize="28sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/>
+            <TextView style="@style/Label" android:text="NEXUS CORNER"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Game Space" android:textColor="@color/text" android:textSize="30sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/>
         </LinearLayout>
-        <ImageView android:id="@+id/btnInfo" android:layout_width="44dp" android:layout_height="44dp" android:padding="11dp" android:src="@drawable/ic_info" android:background="@drawable/icon_btn" android:contentDescription="Termos e direitos autorais"/>
+        <ImageView android:id="@+id/btnInfo" android:layout_width="44dp" android:layout_height="44dp" android:padding="11dp" android:src="@drawable/ic_info" android:background="@drawable/icon_btn" android:contentDescription="Termos"/>
     </LinearLayout>
-    <LinearLayout style="@style/Card" android:orientation="horizontal" android:background="@drawable/card_hero" android:gravity="center_vertical" android:layout_marginTop="24dp">
-        <com.nexuscorner.app.GaugeView android:id="@+id/gauge" android:layout_width="116dp" android:layout_height="116dp"/>
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="20dp">
-            <TextView style="@style/Label" android:text="MEMÓRIA RAM"/>
-            <TextView android:id="@+id/tvRam" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="6dp"/>
-            <TextView android:id="@+id/tvStorage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/muted" android:textSize="12sp" android:layout_marginTop="10dp"/>
-        </LinearLayout>
+    <LinearLayout style="@style/Card" android:orientation="horizontal" android:layout_marginTop="24dp"><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical"><TextView style="@style/Label" android:text="RAM"/><TextView android:id="@+id/tvRamV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/></LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical"><TextView style="@style/Label" android:text="BATERIA"/><TextView android:id="@+id/tvBatV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/></LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical"><TextView style="@style/Label" android:text="TEMP."/><TextView android:id="@+id/tvTempV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/></LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical"><TextView style="@style/Label" android:text="LIVRE"/><TextView android:id="@+id/tvStoV" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="4dp"/></LinearLayout></LinearLayout>
+    <LinearLayout style="@style/Card">
+        <TextView style="@style/Label" android:text="BIBLIOTECA"/>
+        <GridLayout android:id="@+id/grid" android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="3" android:layout_marginTop="12dp"/>
     </LinearLayout>
     <LinearLayout style="@style/Card">
-        <TextView style="@style/Label" android:text="SHIZUKU"/>
+        <TextView style="@style/Label" android:text="OTIMIZAÇÃO · SHIZUKU"/>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:gravity="center_vertical">
             <View android:id="@+id/dotSh" android:layout_width="10dp" android:layout_height="10dp" android:background="@drawable/dot"/>
             <TextView android:id="@+id/tvShizuku" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:textColor="@color/text" android:textSize="15sp" android:fontFamily="sans-serif-medium"/>
         </LinearLayout>
         <Button android:id="@+id/btnShizuku" style="@style/BtnPrimary" android:layout_marginTop="14dp"/>
-    </LinearLayout>
-    <LinearLayout style="@style/Card">
-        <TextView style="@style/Label" android:text="JOGO"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp">
-            <TextView android:id="@+id/chipFf" style="@style/Chip" android:text="Free Fire"/>
-            <TextView android:id="@+id/chipMax" style="@style/Chip" android:text="Free Fire MAX" android:layout_marginEnd="0dp"/>
-        </LinearLayout>
-        <Button android:id="@+id/btnLaunch" style="@style/BtnPrimary" android:text="Abrir jogo" android:layout_marginTop="14dp"/>
-        <Button android:id="@+id/btnData" style="@style/Btn" android:text="Armazenamento e cache"/>
-    </LinearLayout>
-    <LinearLayout style="@style/Card">
-        <TextView style="@style/Label" android:text="TELA"/>
-        <TextView android:id="@+id/tvScreen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:layout_marginTop="8dp"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp">
-            <TextView android:id="@+id/p100" style="@style/Chip" android:text="100%" android:textColor="@color/text"/>
-            <TextView android:id="@+id/p85" style="@style/Chip" android:text="85%" android:textColor="@color/text"/>
-            <TextView android:id="@+id/p75" style="@style/Chip" android:text="75%" android:textColor="@color/text" android:layout_marginEnd="0dp"/>
-        </LinearLayout>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp">
-            <EditText android:id="@+id/etW" style="@style/Input" android:hint="Largura" android:text="1080" android:textColorHint="@color/muted"/>
-            <EditText android:id="@+id/etH" style="@style/Input" android:hint="Altura" android:text="2400" android:textColorHint="@color/muted"/>
-            <EditText android:id="@+id/etD" style="@style/Input" android:hint="DPI" android:text="420" android:textColorHint="@color/muted" android:layout_marginEnd="0dp"/>
-        </LinearLayout>
-        <Button android:id="@+id/btnApply" style="@style/BtnPrimary" android:text="Aplicar resolução" android:layout_marginTop="14dp"/>
-        <Button android:id="@+id/btnReset" style="@style/Btn" android:text="Restaurar padrão"/>
-        <Button android:id="@+id/btnCopy" style="@style/Btn" android:text="Copiar comando (modo manual)"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/screen_note" android:textColor="@color/muted" android:textSize="12sp" android:layout_marginTop="14dp" android:lineSpacingMultiplier="1.2"/>
+        <Button android:id="@+id/btnClean" style="@style/Btn" android:text="Liberar RAM"/>
+        <Button android:id="@+id/btnRestore" style="@style/Btn" android:text="Restaurar tela padrão"/>
     </LinearLayout>
     <TextView android:id="@+id/tvLegal" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="24dp" android:text="Termos, privacidade e direitos autorais" android:textColor="@color/muted" android:textSize="12sp"/>
 </LinearLayout>

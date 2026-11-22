@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="22dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+        <ImageView android:id="@+id/sIcon" android:layout_width="52dp" android:layout_height="52dp" android:padding="7dp" android:background="@drawable/tile"/>
+        <TextView android:id="@+id/sName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:textColor="@color/text" android:textSize="20sp" android:fontFamily="sans-serif-medium"/>
+    </LinearLayout>
+    <TextView style="@style/Label" android:layout_marginTop="22dp" android:text="RESOLUÇÃO E DPI"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"><TextView android:id="@+id/s100" style="@style/Chip" android:text="100%" android:textColor="@color/text"/><TextView android:id="@+id/s85" style="@style/Chip" android:text="85%" android:textColor="@color/text"/><TextView android:id="@+id/s75" style="@style/Chip" android:text="75%" android:textColor="@color/text" android:layout_marginEnd="0dp"/></LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"><EditText android:id="@+id/sW" style="@style/Input" android:hint="Largura" android:textColorHint="@color/muted"/><EditText android:id="@+id/sH" style="@style/Input" android:hint="Altura" android:textColorHint="@color/muted"/><EditText android:id="@+id/sD" style="@style/Input" android:hint="DPI" android:textColorHint="@color/muted" android:layout_marginEnd="0dp"/></LinearLayout>
+    <TextView style="@style/Label" android:layout_marginTop="20dp" android:text="AO JOGAR"/>
+    <Switch android:id="@+id/sGm" android:layout_width="match_parent" android:layout_height="48dp" android:text="Modo desempenho do sistema (Android 12+)" android:textColor="@color/text" android:textSize="14sp"/><Switch android:id="@+id/sDnd" android:layout_width="match_parent" android:layout_height="48dp" android:text="Não perturbe" android:textColor="@color/text" android:textSize="14sp"/>
+    <Button android:id="@+id/sPlay" style="@style/BtnPrimary" android:text="Jogar" android:layout_marginTop="14dp"/>
+    <Button android:id="@+id/sTest" style="@style/Btn" android:text="Testar resolução (15 s)"/>
+    <TextView android:id="@+id/sRemove" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:padding="16dp" android:text="Remover da biblioteca" android:textColor="@color/muted" android:textSize="13sp"/>
+</LinearLayout>

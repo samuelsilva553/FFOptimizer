@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <queries>
+        <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent>
         <package android:name="com.dts.freefireth" />
         <package android:name="com.dts.freefiremax" />
         <package android:name="moe.shizuku.privileged.api" />
