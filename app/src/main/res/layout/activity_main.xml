@@ -12,7 +12,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- CABEÇALHO -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,7 +30,6 @@
             android:textSize="14sp"
             android:layout_marginBottom="24dp"/>
 
-        <!-- GRADE DE BOTÕES (2 COLUNAS) -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -54,18 +52,8 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📱"
-                        android:textSize="40sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="RESOLUÇÃO"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📱" android:textSize="40sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RESOLUÇÃO" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -76,24 +64,15 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardBackgroundColor="#1A1A1A"
-                app:cardCornerRadius="16dp">
+                app:cardCornerRadius="16dp"
+                android:id="@+id/cardOptimize">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚡"
-                        android:textSize="40sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="OTIMIZAR RAM"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⚡" android:textSize="40sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OTIMIZAR RAM" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -104,24 +83,15 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="8dp"
                 app:cardBackgroundColor="#1A1A1A"
-                app:cardCornerRadius="16dp">
+                app:cardCornerRadius="16dp"
+                android:id="@+id/cardClean">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🧹"
-                        android:textSize="40sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="LIMPAR CACHE"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🧹" android:textSize="40sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LIMPAR CACHE" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -139,18 +109,8 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🎮"
-                        android:textSize="40sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ABRIR JOGO"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🎮" android:textSize="40sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ABRIR JOGO" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -168,18 +128,8 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📖"
-                        android:textSize="40sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TUTORIAL"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📖" android:textSize="40sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TUTORIAL" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

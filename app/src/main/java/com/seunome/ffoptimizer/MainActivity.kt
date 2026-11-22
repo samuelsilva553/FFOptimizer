@@ -23,40 +23,76 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializa o Shizuku (com tratamento para não dar crash)
         try {
             Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
                 if (requestCode == REQUEST_CODE) {
                     if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "Shizuku conectado!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Shizuku Conectado!", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this, "Permissão do Shizuku negada.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Permissão negada.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-        } catch (e: Exception) {
-            // Ignora se o Shizuku não estiver instalado
-        }
+        } catch (e: Exception) {}
 
-        // 1. Card Resolução
+        // 1. RESOLUÇÃO
         findViewById<CardView>(R.id.cardResolution)?.setOnClickListener {
             showResolutionDialog()
         }
 
-        // 2. Card Abrir FF
+        // 2. OTIMIZAR RAM
+        findViewById<CardView>(R.id.cardOptimize)?.setOnClickListener {
+            executeCommand("am kill-all", "Apps em segundo plano fechados! RAM liberada.")
+        }
+
+        // 3. LIMPAR CACHE
+        findViewById<CardView>(R.id.cardClean)?.setOnClickListener {
+            executeCommand("pm trim-caches 999999G", "Cache limpo com sucesso!")
+        }
+
+        // 4. ABRIR JOGO
         findViewById<CardView>(R.id.cardOpenFF)?.setOnClickListener {
+            openGame()
+        }
+
+        // 5. TUTORIAL
+        findViewById<CardView>(R.id.cardTutorial)?.setOnClickListener {
+            showTutorialDialog()
+        }
+    }
+
+    private fun openGame() {
+        // Tenta abrir o Free Fire normal, depois o FF Max
+        val packages = listOf("com.dts.freefireth", "com.dts.freefiremax")
+        for (pkg in packages) {
+            val intent = packageManager.getLaunchIntentForPackage(pkg)
+            if (intent != null) {
+                try {
+                    startActivity(intent)
+                    return
+                } catch (e: Exception) {
+                    // Se falhar, tenta o próximo
+                }
+            }
+        }
+        Toast.makeText(this, "Free Fire não encontrado. Verifique se está instalado.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun executeCommand(command: String, successMessage: String) {
+        if (Shizuku.isPreV11()) {
+            Toast.makeText(this, "Ative o Shizuku primeiro.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
             try {
-                val intent = packageManager.getLaunchIntentForPackage("com.dts.freefireth")
-                if (intent != null) startActivity(intent) 
-                else Toast.makeText(this, "Free Fire não instalado.", Toast.LENGTH_SHORT).show()
+                val cmdParts = command.split(" ").toTypedArray()
+                Shizuku.newProcess(cmdParts, null, null)
+                Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-        }
-
-        // 3. Card Tutorial
-        findViewById<CardView>(R.id.cardTutorial)?.setOnClickListener {
-            showTutorialDialog()
+        } else {
+            Shizuku.requestPermission(REQUEST_CODE)
         }
     }
 
@@ -67,8 +103,7 @@ class MainActivity : AppCompatActivity() {
             "1080x1920 (FHD) | DPI 420",
             "1080x2340 (FHD+) | DPI 440",
             "1080x2400 (FHD+) | DPI 440",
-            "1440x2560 (QHD) | DPI 560",
-            "1440x3040 (QHD+) | DPI 560"
+            "1440x2560 (QHD) | DPI 560"
         )
 
         val builder = AlertDialog.Builder(this)
@@ -88,10 +123,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissionAndApply() {
-        if (Shizuku.isPreV11()) {
-            Toast.makeText(this, "Shizuku precisa estar rodando.", Toast.LENGTH_SHORT).show()
-            return
-        }
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
             applyResolution()
         } else {
@@ -101,18 +132,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyResolution() {
         try {
-            // Aplica a resolução
             Shizuku.newProcess(arrayOf("wm", "size", pendingResolution), null, null)
             Shizuku.newProcess(arrayOf("wm", "density", pendingDpi), null, null)
             
-            Toast.makeText(this, "Aplicado! Se a tela ficar estranha, aguarde 15s para reverter.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Aplicado! Se a tela ficar estranha, aguarde 15s.", Toast.LENGTH_LONG).show()
 
-            // Timer de Segurança
             revertRunnable = Runnable {
                 resetResolution()
-                Toast.makeText(this, "Tempo esgotado! Resolução revertida.", Toast.LENGTH_LONG).show()
             }
-            handler.postDelayed(revertRunnable!!, 15000) // 15 segundos
+            handler.postDelayed(revertRunnable!!, 15000)
 
         } catch (e: Exception) {
             Toast.makeText(this, "Erro ao aplicar: ${e.message}", Toast.LENGTH_SHORT).show()
