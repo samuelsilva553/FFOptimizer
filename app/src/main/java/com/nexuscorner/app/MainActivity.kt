@@ -77,6 +77,8 @@ class MainActivity : Activity() {
         tabs.keys.forEach { t -> v<View>(t).setOnClickListener { show(t) } }
         show(R.id.tabGames)
         buildLibrary()
+        intent.getStringExtra("select")?.let { select(it) }
+        if (intent.getStringExtra("tab") == "tools") show(R.id.tabTools)
         mapOf(R.id.cbCpu to "h_cpu", R.id.cbRam to "h_ram", R.id.cbTemp to "h_temp", R.id.cbFps to "h_fps", R.id.cbClock to "h_clock").forEach { (id, k) ->
             v<CheckBox>(id).apply {
                 isChecked = prefs.getBoolean(k, true)
@@ -89,7 +91,7 @@ class MainActivity : Activity() {
         }
         v<View>(R.id.btnStart).setOnClickListener { cur?.let { play(it) } }
         v<View>(R.id.btnGrid).setOnClickListener { cur?.let { sheet(it) } }
-        v<View>(R.id.btnPower).setOnClickListener { finishAffinity() }
+        v<View>(R.id.btnPower).setOnClickListener { finish() }
         v<View>(R.id.btnTerms).setOnClickListener { startActivity(Intent(this, LegalActivity::class.java)) }
         v<View>(R.id.btnShizuku).setOnClickListener {
             when (state()) {
