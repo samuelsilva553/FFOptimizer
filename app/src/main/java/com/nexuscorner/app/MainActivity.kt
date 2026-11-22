@@ -26,6 +26,8 @@ import android.view.Window
 import android.widget.EditText
 import android.widget.GridLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -52,6 +54,8 @@ class MainActivity : Activity() {
     private fun <T : View> v(id: Int): T = findViewById(id)
     private fun toast(m: String) = Toast.makeText(this, m, Toast.LENGTH_LONG).show()
     private fun valid(w: Int?, h: Int?, d: Int?) = w in 400..5000 && h in 400..5000 && d in 120..800
+    private fun dp(x: Int) = (x * resources.displayMetrics.density).toInt()
+    private fun fit(w: Int, h: Int) = if (pw < ph) minOf(w, h) to maxOf(w, h) else maxOf(w, h) to minOf(w, h)
     private fun label(p: String) = packageManager.getApplicationLabel(packageManager.getApplicationInfo(p, 0)).toString()
 
     override fun onCreate(s: Bundle?) {
@@ -188,6 +192,11 @@ class MainActivity : Activity() {
                 s<EditText>(R.id.sD).setText((pd * f).toInt().toString())
             }
         }
+        s<View>(R.id.sCatalog).setOnClickListener {
+            catalog { a, b, c ->
+                s<EditText>(R.id.sW).setText(a.toString()); s<EditText>(R.id.sH).setText(b.toString()); s<EditText>(R.id.sD).setText(c.toString())
+            }
+        }
         fun save(): Boolean {
             val a = num(R.id.sW); val b = num(R.id.sH); val c = num(R.id.sD)
             if (!valid(a, b, c)) { toast(getString(R.string.invalid)); return false }
@@ -211,8 +220,9 @@ class MainActivity : Activity() {
     private fun play(pkg: String) {
         val (w, h, d, gm, dnd) = profile(pkg)
         val c = mutableListOf<String>()
-        val res = w != pw || h != ph || d != pd
-        if (res) c += "wm size ${w}x$h; wm density $d"
+        val (fw, fh) = fit(w, h)
+        val res = fw != pw || fh != ph || d != pd
+        if (res) c += "wm size ${fw}x$fh; wm density $d"
         if (gm == 1 && Build.VERSION.SDK_INT >= 31) c += "cmd game mode performance $pkg"
         if (dnd == 1) c += "cmd notification set_dnd priority"
         if (c.isEmpty()) { launch(pkg); return }
@@ -227,7 +237,8 @@ class MainActivity : Activity() {
     private fun test(pkg: String) {
         val (w, h, d) = profile(pkg)
         if (state() != 3) { toast(getString(R.string.connect_first)); return }
-        bg({ sh("wm size ${w}x$h; wm density $d") }) { o -> if (bad(o)) toast(o.take(140)) else confirm() }
+        val (fw, fh) = fit(w, h)
+        bg({ sh("wm size ${fw}x$fh; wm density $d") }) { o -> if (bad(o)) toast(o.take(140)) else confirm() }
     }
 
     private fun confirm() {
@@ -254,6 +265,32 @@ class MainActivity : Activity() {
         resApplied = false; dndApplied = false
         if (c.isEmpty() || state() != 3) return
         bg({ sh(c.joinToString("; ")) }) { }
+    }
+
+    private fun catalog(pick: (Int, Int, Int) -> Unit) {
+        val dlg = Dialog(this)
+        dlg.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(22), dp(14), dp(22), dp(22)) }
+        for ((title, items) in Presets.groups) {
+            col.addView(TextView(this).apply {
+                text = title.uppercase(); textSize = 11f; letterSpacing = 0.15f
+                setTextColor(getColor(R.color.muted)); setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setPadding(0, dp(20), 0, dp(8))
+            })
+            for ((w, h, d) in items) col.addView(TextView(this).apply {
+                text = "$w × $h   ·   $d dpi"; textSize = 15f
+                setTextColor(getColor(R.color.text)); setBackgroundResource(R.drawable.btn_outline)
+                setPadding(dp(16), dp(14), dp(16), dp(14))
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { bottomMargin = dp(6) }
+                setOnClickListener { pick(w, h, d); dlg.dismiss() }
+            })
+        }
+        dlg.setContentView(ScrollView(this).apply { addView(col) })
+        dlg.window?.apply {
+            setBackgroundDrawableResource(R.drawable.sheet_bg); setGravity(Gravity.BOTTOM)
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.8).toInt())
+        }
+        dlg.show()
     }
 
     // ---------- Shizuku ----------
