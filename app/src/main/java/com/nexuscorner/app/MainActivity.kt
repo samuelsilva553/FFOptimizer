@@ -19,10 +19,12 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.StatFs
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.GridLayout
 import android.widget.ImageView
@@ -75,6 +77,16 @@ class MainActivity : Activity() {
         tabs.keys.forEach { t -> v<View>(t).setOnClickListener { show(t) } }
         show(R.id.tabGames)
         buildLibrary()
+        mapOf(R.id.cbCpu to "h_cpu", R.id.cbRam to "h_ram", R.id.cbTemp to "h_temp", R.id.cbFps to "h_fps", R.id.cbClock to "h_clock").forEach { (id, k) ->
+            v<CheckBox>(id).apply {
+                isChecked = prefs.getBoolean(k, true)
+                setOnCheckedChangeListener { _, c -> prefs.edit().putBoolean(k, c).apply() }
+            }
+        }
+        v<Switch>(R.id.swHud).apply {
+            isChecked = prefs.getBoolean("hud_on", false)
+            setOnCheckedChangeListener { _, c -> prefs.edit().putBoolean("hud_on", c).apply(); if (c) ensureOverlay() }
+        }
         v<View>(R.id.btnStart).setOnClickListener { cur?.let { play(it) } }
         v<View>(R.id.btnGrid).setOnClickListener { cur?.let { sheet(it) } }
         v<View>(R.id.btnPower).setOnClickListener { finishAffinity() }
@@ -100,7 +112,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshShizuku()
-        if (playing) { playing = false; restore() }
+        if (playing) { playing = false; restore(); stopService(Intent(this, OverlayService::class.java)) }
         ui.post(tick)
     }
 
@@ -246,9 +258,24 @@ class MainActivity : Activity() {
         d.show()
     }
 
+    private fun openOverlaySettings() =
+        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+
+    private fun ensureOverlay() {
+        if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf("android.permission.POST_NOTIFICATIONS"), 7)
+        if (Settings.canDrawOverlays(this)) return
+        if (state() == 3) bg({ sh("appops set $packageName SYSTEM_ALERT_WINDOW allow") }) { if (!Settings.canDrawOverlays(this)) openOverlaySettings() }
+        else openOverlaySettings()
+    }
+
     private fun launch(pkg: String) {
         val i = packageManager.getLaunchIntentForPackage(pkg)
-        if (i != null) startActivity(i) else toast(getString(R.string.not_installed))
+        if (i == null) { toast(getString(R.string.not_installed)); return }
+        if (prefs.getBoolean("hud_on", false) && Settings.canDrawOverlays(this)) {
+            startForegroundService(Intent(this, OverlayService::class.java).putExtra("pkg", pkg))
+            playing = true
+        }
+        startActivity(i)
     }
 
     private fun play(pkg: String) {
