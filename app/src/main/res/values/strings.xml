@@ -1,4 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FF Optimizer</string>
+    <string name="app_name">Nexus Corner</string>
+    <string name="headline">Painel de performance</string>
+    <string name="ram_fmt">%1$.1f GB livres de %2$.1f GB</string>
+    <string name="storage_fmt">Armazenamento: %1$.1f GB livres de %2$.1f GB</string>
+    <string name="screen_fmt">Atual: %1$d×%2$d · %3$d dpi</string>
+    <string name="not_installed">Jogo não instalado</string>
+    <string name="invalid">Valores fora do limite seguro</string>
+    <string name="copied">Comando copiado</string>
+    <string name="screen_note">O Nexus Corner não altera a tela sozinho. Cole o comando no Shizuku, no ADB ou em um terminal com permissão. Anote o comando de restauração antes de aplicar: se a tela ficar ruim, rode-o.</string>
+    <string name="legal_html"><![CDATA[
+<b>TERMOS DE USO, PRIVACIDADE E DIREITOS AUTORAIS</b><br>Última atualização: 22/11/2026<br><br>
+<b>1. Aceite</b><br>Ao usar o Nexus Corner você concorda com estes termos. Se não concordar, desinstale o aplicativo.<br><br>
+<b>2. O que o app faz</b><br>Exibe informações do aparelho (memória, armazenamento, tela), abre o jogo instalado, atalha para as configurações de armazenamento do sistema e gera comandos de ajuste de tela para você executar por conta própria.<br><br>
+<b>3. Uso por sua conta e risco</b><br>Alterar resolução ou DPI pode deixar a tela ilegível ou instável em alguns aparelhos. O app é fornecido "como está", sem garantia de desempenho, compatibilidade ou aumento de FPS. Os resultados dependem do aparelho.<br><br>
+<b>4. Limitação de responsabilidade</b><br>Na máxima extensão permitida pela lei, o desenvolvedor não responde por danos, perda de dados, bloqueios de conta ou falhas decorrentes do uso do app ou da execução dos comandos gerados.<br><br>
+<b>5. Uso permitido</b><br>É proibido usar o app para fraudar jogos, burlar sistemas de segurança, copiar, revender ou redistribuir o app como se fosse seu.<br><br>
+<b>6. Privacidade (LGPD)</b><br>O Nexus Corner não solicita permissão de internet, não possui anúncios, não usa contas e não coleta, armazena nem compartilha dados pessoais. Tudo é processado localmente no aparelho.<br><br>
+<b>7. Direitos autorais</b><br>© 2026 Nexus Corner. Todos os direitos reservados. Nome, logotipo, design e código-fonte são protegidos pela Lei nº 9.610/1998. A reprodução sem autorização é proibida.<br><br>
+<b>8. Marcas de terceiros</b><br>Free Fire, Free Fire MAX e Garena são marcas de seus respectivos titulares. O Nexus Corner é um aplicativo independente, sem afiliação, patrocínio ou endosso da Garena. As marcas são citadas apenas para identificar os jogos compatíveis.<br><br>
+<b>9. Alterações</b><br>Estes termos podem ser atualizados. O uso continuado após a atualização indica concordância.<br><br>
+<b>10. Foro e contato</b><br>Aplica-se a lei brasileira. Contato: [coloque aqui seu e-mail de suporte]
+]]></string>
 </resources>
