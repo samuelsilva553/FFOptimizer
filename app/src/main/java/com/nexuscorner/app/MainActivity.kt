@@ -30,7 +30,7 @@ class MainActivity : Activity() {
         fun paint() = chips.forEach { (id, p) ->
             v<TextView>(id).apply {
                 isSelected = p == sel
-                setTextColor(getColor(if (isSelected) R.color.bg else R.color.text))
+                setTextColor(getColor(if (isSelected) R.color.text else R.color.muted))
             }
         }
         chips.forEach { (id, p) -> v<TextView>(id).setOnClickListener { sel = p; paint() } }
@@ -51,7 +51,14 @@ class MainActivity : Activity() {
             copy("wm size ${w}x$h && wm density $d")
         }
         v<TextView>(R.id.btnReset).setOnClickListener { copy("wm size reset && wm density reset") }
-        v<TextView>(R.id.tvLegal).setOnClickListener { startActivity(Intent(this, LegalActivity::class.java)) }
+        val legal = { _: android.view.View -> startActivity(Intent(this, LegalActivity::class.java)) }
+        v<android.view.View>(R.id.tvLegal).setOnClickListener(legal)
+        v<android.view.View>(R.id.btnInfo).setOnClickListener(legal)
+        val box = v<android.view.ViewGroup>(R.id.content)
+        for (i in 0 until box.childCount) box.getChildAt(i).apply {
+            alpha = 0f; translationY = 48f
+            animate().alpha(1f).translationY(0f).setStartDelay(i * 70L).setDuration(380).start()
+        }
     }
 
     private fun copy(cmd: String) {
@@ -64,7 +71,7 @@ class MainActivity : Activity() {
         val mi = ActivityManager.MemoryInfo()
         (getSystemService(ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(mi)
         v<TextView>(R.id.tvRam).text = getString(R.string.ram_fmt, mi.availMem / 1e9, mi.totalMem / 1e9)
-        v<ProgressBar>(R.id.pbRam).progress = (100 - mi.availMem * 100 / mi.totalMem).toInt()
+        v<GaugeView>(R.id.gauge).setValue((100 - mi.availMem * 100 / mi.totalMem).toInt())
         val st = StatFs(Environment.getDataDirectory().path)
         v<TextView>(R.id.tvStorage).text = getString(R.string.storage_fmt, st.availableBytes / 1e9, st.totalBytes / 1e9)
         val dm = resources.displayMetrics

@@ -1,4 +1,5 @@
 <resources>
-    <color name="bg">#0A0A0C</color><color name="card">#121216</color><color name="line">#26262D</color>
-    <color name="text">#F2F2F5</color><color name="muted">#8A8A96</color><color name="accent">#F2F2F5</color>
+    <color name="bg">#0A0A0F</color><color name="card">#13131A</color><color name="line">#262633</color>
+    <color name="text">#F4F4F8</color><color name="muted">#8B8B9E</color>
+    <color name="a1">#7C5CFF</color><color name="a2">#3DDCFF</color>
 </resources>
