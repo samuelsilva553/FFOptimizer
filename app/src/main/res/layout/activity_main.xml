@@ -48,7 +48,7 @@
         </ScrollView>
         <LinearLayout android:id="@+id/panelInfo" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:visibility="gone" android:gravity="center">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nexus Corner" android:textColor="@color/text" android:textSize="22sp" android:fontFamily="sans-serif-black"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Versão 1.8.0 · app independente" android:textColor="@color/muted" android:textSize="12sp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Versão 1.8.1 · app independente" android:textColor="@color/muted" android:textSize="12sp"/>
             <Button android:id="@+id/btnTerms" style="@style/Btn" android:layout_width="320dp" android:layout_marginTop="18dp" android:text="Termos, privacidade e direitos autorais"/>
         </LinearLayout>
     </FrameLayout>
