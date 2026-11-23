@@ -20,8 +20,9 @@ class LobbyActivity : Activity() {
         super.onCreate(s)
         setContentView(R.layout.activity_lobby)
         prefs = getSharedPreferences("nc", MODE_PRIVATE)
+        v<TextView>(R.id.tvVer).text = "V" + packageManager.getPackageInfo(packageName, 0).versionName
         val legal = { _: View -> startActivity(Intent(this, LegalActivity::class.java)) }
-        v<TextView>(R.id.tvFooter).text = "Nexus Corner v" + packageManager.getPackageInfo(packageName, 0).versionName + "  ·  Termos e direitos autorais"
+        v<TextView>(R.id.tvFooter).text = "Termos e direitos autorais"
         v<View>(R.id.tvFooter).setOnClickListener(legal)
         v<View>(R.id.btnInfo).setOnClickListener(legal)
         v<View>(R.id.btnSpace).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
@@ -35,8 +36,6 @@ class LobbyActivity : Activity() {
         (getSystemService(ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(mi)
         v<TextView>(R.id.tvRam).text = "${100 - mi.availMem * 100 / mi.totalMem}%"
         val b = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val sc = b?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
-        v<TextView>(R.id.tvBat).text = "${(b?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0) ?: 0) * 100 / sc}%"
         v<TextView>(R.id.tvTemp).text = "%.0f°C".format((b?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0) / 10.0)
         build()
     }
